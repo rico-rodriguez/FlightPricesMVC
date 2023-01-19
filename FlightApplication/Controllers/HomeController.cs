@@ -1,14 +1,9 @@
-﻿using System.Diagnostics;
-using System.Globalization;
-using System.Net;
-using System.Net.Http.Headers;
-using System.Web.Mvc;
+﻿using FlightApplication.Models;
 using Microsoft.AspNetCore.Mvc;
-using FlightApplication.Models;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using NuGet.Protocol;
+using System.Diagnostics;
+using System.Globalization;
+using System.Net.Http.Headers;
 using ActionResult = Microsoft.AspNetCore.Mvc.ActionResult;
 using Controller = Microsoft.AspNetCore.Mvc.Controller;
 
@@ -16,9 +11,16 @@ namespace FlightApplication.Controllers;
 
 public class HomeController : Controller
 {
-[System.Web.Mvc.HttpGet]
+    IConfiguration _config;
+    public HomeController(IConfiguration configuration)
+    {
+        _config = configuration;
+    }
+    [System.Web.Mvc.HttpGet]
     public async Task<ActionResult> Index(FlightSearchModel searchModel)
     {
+        var secretValue = _config["SecretValue"];
+        ViewData["TheSecretOrSomething"] = secretValue;
 
         if (HttpContext.Request.Method == "POST")
         {
@@ -28,8 +30,8 @@ public class HomeController : Controller
             string formattedDepartureDate = departureDate.ToString("yyyy-MM-dd");
             string formattedReturnDate = returnDate.ToString("yyyy-MM-dd");
 
-            string apiUrl = "https://api.tequila.kiwi.com/v2/search?fly_from=" + 
-                            searchModel.Origin + "&fly_to=" + searchModel.Destination + 
+            string apiUrl = "https://api.tequila.kiwi.com/v2/search?fly_from=" +
+                            searchModel.Origin + "&fly_to=" + searchModel.Destination +
                             "&dateFrom=" + formattedDepartureDate + "&dateTo=" + formattedReturnDate;
             using var client = new HttpClient();
             client.BaseAddress = new Uri("https://api.tequila.kiwi.com/");
